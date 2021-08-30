@@ -1,6 +1,7 @@
 package algorithm;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Random;
 import datamodel.Triple;
 //import util.SimpleTool;
@@ -87,9 +88,8 @@ public class SimpleMatrixFactorization {
 	 *            The number of ratings.
 	 ************************ 
 	 */
-	public SimpleMatrixFactorization(Triple[][] paraTrainingSet, Triple[][] paraValidationSet,
-			int paraNumUsers, int paraNumItems, double paraRatingLowerBound,
-			double paraRatingUpperBound) {
+	public SimpleMatrixFactorization(Triple[][] paraTrainingSet, Triple[][] paraValidationSet, int paraNumUsers,
+			int paraNumItems, double paraRatingLowerBound, double paraRatingUpperBound) {
 		trainingSet = paraTrainingSet;
 		validationSet = paraValidationSet;
 		numUsers = paraNumUsers;
@@ -123,14 +123,14 @@ public class SimpleMatrixFactorization {
 
 		for (int i = 0; i < numUsers; i++) {
 			for (int j = 0; j < rank; j++) {
-				userSubspace[i][j] = rand.nextDouble() - 0.5;
+				userSubspace[i][j] = (rand.nextDouble() - 0.5) / 10;
 			} // Of for j
 		} // Of for i
 
 		itemSubspace = new double[numItems][rank];
 		for (int i = 0; i < numItems; i++) {
 			for (int j = 0; j < rank; j++) {
-				itemSubspace[i][j] = rand.nextDouble() - 0.5;
+				itemSubspace[i][j] = (rand.nextDouble() - 0.5) / 10;
 			} // Of for j
 		} // Of for i
 	}// Of initializeSubspaces
@@ -176,8 +176,7 @@ public class SimpleMatrixFactorization {
 				// Show the process
 				System.out.println("Round " + i);
 				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
-						+ rsme(validationSet));
+				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = " + rsme(validationSet));
 			} // Of if
 		} // Of for i
 
@@ -190,8 +189,7 @@ public class SimpleMatrixFactorization {
 				// Show the process
 				System.out.println("Round " + i);
 				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
-						+ rsme(validationSet));
+				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = " + rsme(validationSet));
 
 				if (tempCurrentValidationMae > tempLastValidationMae) {
 					break;
@@ -327,6 +325,12 @@ public class SimpleMatrixFactorization {
 			} // Of for j
 		} // Of for i
 
+		// System.out.println("userSubspace = " +
+		// Arrays.deepToString(userSubspace));
+		// System.out.println("itemSubspace = " +
+		// Arrays.deepToString(itemSubspace));
+		// System.out.println("resultMae = " + resultMae);
+		// System.out.println("tempTestCount = " + tempTestCount);
 		return (resultMae / tempTestCount);
 	}// Of mae
 
@@ -543,20 +547,17 @@ public class SimpleMatrixFactorization {
 
 				if (tempSecondStart >= tempLength) {
 					for (int j = tempFirstIndex; j < tempLength; j++) {
-						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
-								% 2][j];
+						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
 						tempFirstIndex++;
 						tempCurrentIndex++;
 					} // Of for j
 					break;
 				} // Of if
 
-				while ((tempFirstIndex <= tempSecondStart - 1)
-						&& (tempSecondIndex <= tempSecondEnd)) {
+				while ((tempFirstIndex <= tempSecondStart - 1) && (tempSecondIndex <= tempSecondEnd)) {
 
-					if (paraArray[resultMatrix[tempIndex
-							% 2][tempFirstIndex]] >= paraArray[resultMatrix[tempIndex
-									% 2][tempSecondIndex]]) {
+					if (paraArray[resultMatrix[tempIndex % 2][tempFirstIndex]] >= paraArray[resultMatrix[tempIndex
+							% 2][tempSecondIndex]]) {
 						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
 								% 2][tempFirstIndex];
 						tempFirstIndex++;
@@ -570,13 +571,11 @@ public class SimpleMatrixFactorization {
 
 				// Remaining part
 				for (int j = tempFirstIndex; j < tempSecondStart; j++) {
-					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
-							% 2][j];
+					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
 					tempCurrentIndex++;
 				} // Of for j
 				for (int j = tempSecondIndex; j <= tempSecondEnd; j++) {
-					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
-							% 2][j];
+					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
 					tempCurrentIndex++;
 				} // Of for j
 			} // Of for i
