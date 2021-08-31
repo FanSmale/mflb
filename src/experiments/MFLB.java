@@ -61,10 +61,11 @@ public class MFLB {
 	 * Adjust C for SigmoidMF.
 	 ************************ 
 	 */
-	public static void constantCAdjusting(String paraFilename, int paraNumUsers, int paraNumItems, int paraNumRatings,
-			double paraRatingLowerBound, double paraRatingUpperBound, int paraMinimalRounds, int paraNumExperiments)
-			throws Exception {
-		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems, paraNumRatings);
+	public static void constantCAdjusting(String paraFilename, int paraNumUsers, int paraNumItems,
+			int paraNumRatings, double paraRatingLowerBound, double paraRatingUpperBound,
+			int paraMinimalRounds, int paraNumExperiments) throws Exception {
+		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems,
+				paraNumRatings);
 		int tempNumC = 2;
 		double[] tempCValues = new double[tempNumC];
 		for (int i = 0; i < tempNumC; i++) {
@@ -102,11 +103,12 @@ public class MFLB {
 
 			double[] tempLikeThresholds = new double[tempNumThresholds];
 			for (int j = 0; j < tempNumThresholds; j++) {
-				tempLikeThresholds[j] = tempOriginalLikeThresholds[j] - tempRatingSystem.getMeanRatingOfTrain() - 0.01;
+				tempLikeThresholds[j] = tempOriginalLikeThresholds[j]
+						- tempRatingSystem.getMeanRatingOfTrain() - 0.01;
 			} // Of for j
 
-			SigmoidMF tempMF = new SigmoidMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-					paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+			SigmoidMF tempMF = new SigmoidMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
+					paraNumItems, paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
 			tempMF.setParameters(5, 0.0003, 0.005);
 
 			for (int j = 0; j < tempNumC; j++) {
@@ -136,7 +138,8 @@ public class MFLB {
 				tempTestAverageMaeArray[j] += tempTestMaeMatrix[i][j] / paraNumExperiments;
 				tempTestAverageRmseArray[j] += tempTestRmseMatrix[i][j] / paraNumExperiments;
 				for (int k = 0; k < tempNumThresholds; k++) {
-					tempTestAverageAucMatrix[j][k] += tempTestAucCubic[i][j][k] / paraNumExperiments;
+					tempTestAverageAucMatrix[j][k] += tempTestAucCubic[i][j][k]
+							/ paraNumExperiments;
 				} // Of for k
 			} // Of for j
 		} // Of for i
@@ -151,23 +154,29 @@ public class MFLB {
 		for (int i = 0; i < paraNumExperiments; i++) {
 			for (int j = 0; j < tempNumC; j++) {
 				tempDifference = (tempTrainMaeMatrix[i][j] - tempTrainAverageMaeArray[j]);
-				tempTrainMaeDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainMaeDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTrainRoundsMatrix[i][j] - tempTrainAverageRoundsArray[j]);
-				tempTrainRoundsDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainRoundsDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTrainRmseMatrix[i][j] - tempTrainAverageRmseArray[j]);
-				tempTrainRmseDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainRmseDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTestMaeMatrix[i][j] - tempTestAverageMaeArray[j]);
-				tempTestMaeDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTestMaeDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTestRmseMatrix[i][j] - tempTestAverageRmseArray[j]);
-				tempTestRmseDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTestRmseDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				for (int k = 0; k < tempNumThresholds; k++) {
 					tempDifference = (tempTestAucCubic[i][j][k] - tempTestAverageAucMatrix[j][k]);
-					tempTestAucDeviationMatrix[j][k] += tempDifference * tempDifference / paraNumExperiments;
+					tempTestAucDeviationMatrix[j][k] += tempDifference * tempDifference
+							/ paraNumExperiments;
 				} // Of for k
 			} // Of for j
 		} // Of for i
@@ -175,19 +184,20 @@ public class MFLB {
 		System.out.println("===Here are final results===");
 		for (int j = 0; j < tempNumC; j++) {
 			System.out.println("---- C = " + tempCValues[j] + " ----");
-			System.out.println(
-					"Train MAE: " + tempTrainAverageMaeArray[j] + " +- " + Math.sqrt(tempTrainMaeDeviationArray[j]));
-			System.out.println(
-					"Train rounds: " + tempTrainAverageRoundsArray[j] + " +- " + Math.sqrt(tempTrainRoundsDeviationArray[j]));
-			System.out.println(
-					"Train RMSE: " + tempTrainAverageRmseArray[j] + " +- " + Math.sqrt(tempTrainRmseDeviationArray[j]));
-			System.out.println(
-					"Test MAE: " + tempTestAverageMaeArray[j] + " +- " + Math.sqrt(tempTestMaeDeviationArray[j]));
-			System.out.println(
-					"Test RMSE: " + tempTestAverageRmseArray[j] + " +- " + Math.sqrt(tempTestRmseDeviationArray[j]));
+			System.out.println("Train MAE: " + tempTrainAverageMaeArray[j] + " +- "
+					+ Math.sqrt(tempTrainMaeDeviationArray[j]));
+			System.out.println("Train rounds: " + tempTrainAverageRoundsArray[j] + " +- "
+					+ Math.sqrt(tempTrainRoundsDeviationArray[j]));
+			System.out.println("Train RMSE: " + tempTrainAverageRmseArray[j] + " +- "
+					+ Math.sqrt(tempTrainRmseDeviationArray[j]));
+			System.out.println("Test MAE: " + tempTestAverageMaeArray[j] + " +- "
+					+ Math.sqrt(tempTestMaeDeviationArray[j]));
+			System.out.println("Test RMSE: " + tempTestAverageRmseArray[j] + " +- "
+					+ Math.sqrt(tempTestRmseDeviationArray[j]));
 			for (int k = 0; k < tempNumThresholds; k++) {
-				System.out.println("Test AUC with like threshold " + tempOriginalLikeThresholds[k] + ": "
-						+ tempTestAverageAucMatrix[j][k] + " +- " + Math.sqrt(tempTestAucDeviationMatrix[j][k]));
+				System.out.println("Test AUC with like threshold " + tempOriginalLikeThresholds[k]
+						+ ": " + tempTestAverageAucMatrix[j][k] + " +- "
+						+ Math.sqrt(tempTestAucDeviationMatrix[j][k]));
 			} // Of for k
 		} // Of for j
 
@@ -199,19 +209,19 @@ public class MFLB {
 				System.out.print("" + tempTrainRoundsMatrix[i][j] + ",");
 			} // Of for i
 			System.out.println();
-			
+
 			System.out.print("Test MAE detail: ");
 			for (int i = 0; i < paraNumExperiments; i++) {
 				System.out.print("" + tempTestMaeMatrix[i][j] + ",");
 			} // Of for i
 			System.out.println();
-			
+
 			System.out.print("Test RMSE detail: ");
 			for (int i = 0; i < paraNumExperiments; i++) {
 				System.out.print("" + tempTestRmseMatrix[i][j] + ",");
 			} // Of for i
 			System.out.println();
-			
+
 			System.out.print("Test AUC detail: ");
 			for (int i = 0; i < paraNumExperiments; i++) {
 				System.out.print("" + Arrays.toString(tempTestAucCubic[i][j]) + ",");
@@ -225,13 +235,14 @@ public class MFLB {
 	 * Compare all schemes.
 	 ************************ 
 	 */
-	public static void schemeComparison(String paraFilename, int paraNumUsers, int paraNumItems, int paraNumRatings,
-			double paraRatingLowerBound, double paraRatingUpperBound, int paraMinimalRounds, int paraNumExperiments)
-			throws Exception {
+	public static void schemeComparison(String paraFilename, int paraNumUsers, int paraNumItems,
+			int paraNumRatings, double paraRatingLowerBound, double paraRatingUpperBound,
+			int paraMinimalRounds, int paraNumExperiments) throws Exception {
 		double[] tempOriginalLikeThresholds = { 3.0, 4.0, 5.0 };
 		int tempNumThresholds = tempOriginalLikeThresholds.length;
 
-		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems, paraNumRatings);
+		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems,
+				paraNumRatings);
 
 		double[][] tempTrainMaeMatrix = new double[paraNumExperiments][NUM_SCHEMES];
 		double[][] tempTrainRoundsMatrix = new double[paraNumExperiments][NUM_SCHEMES];
@@ -248,13 +259,13 @@ public class MFLB {
 		double[] tempTestAverageRmseArray = new double[NUM_SCHEMES];
 		double[][] tempTestAverageAucMatrix = new double[NUM_SCHEMES][tempNumThresholds];
 		double[][] tempTestAverageNdcgMatrix = new double[NUM_SCHEMES][tempNumThresholds];
-		
+
 		boolean tempValidation = false;
 
 		for (int i = 0; i < paraNumExperiments; i++) {
 			System.out.println("*** Training and testing # " + i + " ***");
 			tempRatingSystem.splitTrainValidationTest(0.5, 0.1);
-			double tempMean = tempRatingSystem.getMeanRatingOfTrain(); 
+			double tempMean = tempRatingSystem.getMeanRatingOfTrain();
 			Triple[][] tempTrainingMatrix = tempRatingSystem.getTrainingMatrix();
 			tempRatingSystem.centralize(tempTrainingMatrix);
 			Triple[][] tempValidationMatrix = tempRatingSystem.getValidationMatrix();
@@ -264,51 +275,59 @@ public class MFLB {
 
 			double[] tempLikeThresholds = new double[tempNumThresholds];
 			for (int j = 0; j < tempNumThresholds; j++) {
-				tempLikeThresholds[j] = tempOriginalLikeThresholds[j] - tempRatingSystem.getMeanRatingOfTrain() - 0.01;
+				tempLikeThresholds[j] = tempOriginalLikeThresholds[j]
+						- tempRatingSystem.getMeanRatingOfTrain() - 0.01;
 			} // Of for j
 
 			for (int j = 0; j < NUM_SCHEMES; j++) {
 				SimpleMatrixFactorization tempMF = null;
 				switch (j) {
 				case SIMPLE:
-					tempMF = new SimpleMatrixFactorization(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
-							paraNumItems, paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new SimpleMatrixFactorization(tempTrainingMatrix, tempValidationMatrix,
+							paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.005);
 					tempValidation = false;
 					break;
 				case SIMPLE_VALIDATION:
-					tempMF = new SimpleMatrixFactorization(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
-							paraNumItems, paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new SimpleMatrixFactorization(tempTrainingMatrix, tempValidationMatrix,
+							paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.005);
 					tempValidation = true;
 					break;
 				case ONE_REGULAR:
-					tempMF = new OneRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-							paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new OneRegularMF(tempTrainingMatrix, tempValidationMatrix,
+							paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.01);
 					tempValidation = false;
 					break;
 				case ONE_REGULAR_VALIDATION:
-					tempMF = new OneRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-							paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new OneRegularMF(tempTrainingMatrix, tempValidationMatrix,
+							paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.01);
 					tempValidation = true;
 					break;
 				case PQ_REGULAR:
-					tempMF = new PQRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-							paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new PQRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
+							paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.01);
 					tempValidation = false;
 					break;
 				case PQ_REGULAR_VALIDATION:
-					tempMF = new PQRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-							paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new PQRegularMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
+							paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0002, 0.01);
 					tempValidation = true;
 					break;
 				case SIGMOID:
-					tempMF = new SigmoidMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers, paraNumItems,
-							paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+					tempMF = new SigmoidMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
+							paraNumItems, paraRatingLowerBound - tempMean,
+							paraRatingUpperBound - tempMean);
 					tempMF.setParameters(5, 0.0003, 0.005);
 					tempValidation = true;
 					break;
@@ -327,7 +346,8 @@ public class MFLB {
 				tempTestMaeMatrix[i][j] = tempMF.mae(tempTestingMatrix);
 				tempTestRmseMatrix[i][j] = tempMF.rsme(tempTestingMatrix);
 				tempTestAucCubic[i][j] = tempMF.auc(tempTestingMatrix, tempLikeThresholds);
-				tempTestNdcgCubic[i][j] = tempMF.ndcg(tempTestingMatrix, paraNumItems, 100, tempLikeThresholds);
+				tempTestNdcgCubic[i][j] = tempMF.ndcg(tempTrainingMatrix, tempValidationMatrix,
+						tempTestingMatrix, paraNumItems, 100, tempLikeThresholds);
 
 				System.out.println("\r\nMAE: " + tempTestMaeMatrix[i][j]);
 				System.out.println("RSME: " + tempTestRmseMatrix[i][j]);
@@ -343,8 +363,10 @@ public class MFLB {
 				tempTestAverageMaeArray[j] += tempTestMaeMatrix[i][j] / paraNumExperiments;
 				tempTestAverageRmseArray[j] += tempTestRmseMatrix[i][j] / paraNumExperiments;
 				for (int k = 0; k < tempNumThresholds; k++) {
-					tempTestAverageAucMatrix[j][k] += tempTestAucCubic[i][j][k] / paraNumExperiments;
-					tempTestAverageNdcgMatrix[j][k] += tempTestNdcgCubic[i][j][k] / paraNumExperiments;
+					tempTestAverageAucMatrix[j][k] += tempTestAucCubic[i][j][k]
+							/ paraNumExperiments;
+					tempTestAverageNdcgMatrix[j][k] += tempTestNdcgCubic[i][j][k]
+							/ paraNumExperiments;
 				} // Of for k
 			} // Of for j
 		} // Of for i
@@ -360,28 +382,35 @@ public class MFLB {
 		for (int i = 0; i < paraNumExperiments; i++) {
 			for (int j = 0; j < NUM_SCHEMES; j++) {
 				tempDifference = (tempTrainMaeMatrix[i][j] - tempTrainAverageMaeArray[j]);
-				tempTrainMaeDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainMaeDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTrainRoundsMatrix[i][j] - tempTrainAverageRoundsArray[j]);
-				tempTrainRoundsDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainRoundsDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTrainRmseMatrix[i][j] - tempTrainAverageRmseArray[j]);
-				tempTrainRmseDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTrainRmseDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTestMaeMatrix[i][j] - tempTestAverageMaeArray[j]);
-				tempTestMaeDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTestMaeDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				tempDifference = (tempTestRmseMatrix[i][j] - tempTestAverageRmseArray[j]);
-				tempTestRmseDeviationArray[j] += tempDifference * tempDifference / paraNumExperiments;
+				tempTestRmseDeviationArray[j] += tempDifference * tempDifference
+						/ paraNumExperiments;
 
 				for (int k = 0; k < tempNumThresholds; k++) {
 					tempDifference = (tempTestAucCubic[i][j][k] - tempTestAverageAucMatrix[j][k]);
-					tempTestAucDeviationMatrix[j][k] += tempDifference * tempDifference / paraNumExperiments;
+					tempTestAucDeviationMatrix[j][k] += tempDifference * tempDifference
+							/ paraNumExperiments;
 				} // Of for k
 
 				for (int k = 0; k < tempNumThresholds; k++) {
 					tempDifference = (tempTestNdcgCubic[i][j][k] - tempTestAverageNdcgMatrix[j][k]);
-					tempTestNdcgDeviationMatrix[j][k] += tempDifference * tempDifference / paraNumExperiments;
+					tempTestNdcgDeviationMatrix[j][k] += tempDifference * tempDifference
+							/ paraNumExperiments;
 				} // Of for k
 			} // Of for j
 		} // Of for i
@@ -389,23 +418,25 @@ public class MFLB {
 		System.out.println("===Here are final results===");
 		for (int j = 0; j < NUM_SCHEMES; j++) {
 			System.out.println("Scheme #" + j);
-			System.out.println(
-					"Train MAE: " + tempTrainAverageMaeArray[j] + " +- " + Math.sqrt(tempTrainMaeDeviationArray[j]));
-			System.out.println(
-					"Train Rounds: " + tempTrainAverageRoundsArray[j] + " +- " + Math.sqrt(tempTrainRoundsDeviationArray[j]));
-			System.out.println(
-					"Train RMSE: " + tempTrainAverageRmseArray[j] + " +- " + Math.sqrt(tempTrainRmseDeviationArray[j]));
-			System.out.println(
-					"Test MAE: " + tempTestAverageMaeArray[j] + " +- " + Math.sqrt(tempTestMaeDeviationArray[j]));
-			System.out.println(
-					"Test RMSE: " + tempTestAverageRmseArray[j] + " +- " + Math.sqrt(tempTestRmseDeviationArray[j]));
+			System.out.println("Train MAE: " + tempTrainAverageMaeArray[j] + " +- "
+					+ Math.sqrt(tempTrainMaeDeviationArray[j]));
+			System.out.println("Train Rounds: " + tempTrainAverageRoundsArray[j] + " +- "
+					+ Math.sqrt(tempTrainRoundsDeviationArray[j]));
+			System.out.println("Train RMSE: " + tempTrainAverageRmseArray[j] + " +- "
+					+ Math.sqrt(tempTrainRmseDeviationArray[j]));
+			System.out.println("Test MAE: " + tempTestAverageMaeArray[j] + " +- "
+					+ Math.sqrt(tempTestMaeDeviationArray[j]));
+			System.out.println("Test RMSE: " + tempTestAverageRmseArray[j] + " +- "
+					+ Math.sqrt(tempTestRmseDeviationArray[j]));
 			for (int k = 0; k < tempNumThresholds; k++) {
-				System.out.println("Test AUC with like threshold " + tempOriginalLikeThresholds[k] + ": "
-						+ tempTestAverageAucMatrix[j][k] + " +- " + Math.sqrt(tempTestAucDeviationMatrix[j][k]));
+				System.out.println("Test AUC with like threshold " + tempOriginalLikeThresholds[k]
+						+ ": " + tempTestAverageAucMatrix[j][k] + " +- "
+						+ Math.sqrt(tempTestAucDeviationMatrix[j][k]));
 			} // Of for k
 			for (int k = 0; k < tempNumThresholds; k++) {
-				System.out.println("Test NDCG with like threshold " + tempOriginalLikeThresholds[k] + ": "
-						+ tempTestAverageNdcgMatrix[j][k] + " +- " + Math.sqrt(tempTestNdcgDeviationMatrix[j][k]));
+				System.out.println("Test NDCG with like threshold " + tempOriginalLikeThresholds[k]
+						+ ": " + tempTestAverageNdcgMatrix[j][k] + " +- "
+						+ Math.sqrt(tempTestNdcgDeviationMatrix[j][k]));
 			} // Of for k
 		} // Of for j
 
@@ -439,15 +470,16 @@ public class MFLB {
 	 * Compare all schemes.
 	 ************************ 
 	 */
-	public static void ndcgTest(String paraFilename, int paraNumUsers, int paraNumItems, int paraNumRatings,
-			double paraRatingLowerBound, double paraRatingUpperBound, int paraMinimalRounds)
-			throws Exception {
-		double[] tempOriginalLikeThresholds = {3.0, 4.0, 5.0 };
+	public static void ndcgTest(String paraFilename, int paraNumUsers, int paraNumItems,
+			int paraNumRatings, double paraRatingLowerBound, double paraRatingUpperBound,
+			int paraMinimalRounds) throws Exception {
+		double[] tempOriginalLikeThresholds = { 3.0, 4.0, 5.0 };
 		int tempNumThresholds = tempOriginalLikeThresholds.length;
 
-		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems, paraNumRatings);
+		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems,
+				paraNumRatings);
 		tempRatingSystem.splitTrainValidationTest(0.5, 0.1);
-		double tempMean = tempRatingSystem.getMeanRatingOfTrain(); 
+		double tempMean = tempRatingSystem.getMeanRatingOfTrain();
 		Triple[][] tempTrainingMatrix = tempRatingSystem.getTrainingMatrix();
 		tempRatingSystem.centralize(tempTrainingMatrix);
 		Triple[][] tempValidationMatrix = tempRatingSystem.getValidationMatrix();
@@ -457,18 +489,21 @@ public class MFLB {
 
 		double[] tempLikeThresholds = new double[tempNumThresholds];
 		for (int j = 0; j < tempNumThresholds; j++) {
-			tempLikeThresholds[j] = tempOriginalLikeThresholds[j] - tempRatingSystem.getMeanRatingOfTrain() - 0.01;
+			tempLikeThresholds[j] = tempOriginalLikeThresholds[j]
+					- tempRatingSystem.getMeanRatingOfTrain() - 0.01;
 		} // Of for j
-		
-		SimpleMatrixFactorization tempMF = new SimpleMatrixFactorization(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
-				paraNumItems, paraRatingLowerBound - tempMean, paraRatingUpperBound - tempMean);
+
+		SimpleMatrixFactorization tempMF = new SimpleMatrixFactorization(tempTrainingMatrix,
+				tempValidationMatrix, paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
+				paraRatingUpperBound - tempMean);
 		tempMF.setParameters(5, 0.0002, 0.005);
 		tempMF.train(paraMinimalRounds, true);
-		
-		double[] tempNdcgArray = tempMF.ndcg(tempTestingMatrix, paraNumItems, 900, tempLikeThresholds);
-		
+
+		double[] tempNdcgArray = tempMF.ndcg(tempTrainingMatrix, tempValidationMatrix,
+				tempTestingMatrix, paraNumItems, 100, tempLikeThresholds);
+
 		System.out.println("tempNdcgArray = " + Arrays.toString(tempNdcgArray));
-	}//Of ndcgTest
+	}// Of ndcgTest
 
 	/**
 	 ************************ 
@@ -477,11 +512,13 @@ public class MFLB {
 	 */
 	public static void main(String args[]) {
 		try {
-			//constantCAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 2);
+			// constantCAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
+			// 100000, 1, 5, 1000, 2);
 			// lambdaAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 10);
 			schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 10);
-			//ndcgTest("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000);
+			// ndcgTest("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1,
+			// 5, 1000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} // Of try
