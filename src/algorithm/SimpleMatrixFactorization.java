@@ -159,9 +159,12 @@ public class SimpleMatrixFactorization {
 	 * 
 	 * @param paraMinimalRounds
 	 *            The minimal number of rounds.
+	 * @param paraValidation
+	 * Use validation set or not.
+	 * @return The training rounds.
 	 ************************ 
 	 */
-	public void train(int paraMinimalRounds) {
+	public int train(int paraMinimalRounds, boolean paraValidation) {
 		initializeSubspaces();
 
 		double tempCurrentValidationMae = 100;
@@ -182,31 +185,52 @@ public class SimpleMatrixFactorization {
 			} // Of if
 		} // Of for i
 
-		// Step 2. Stop after converge.
-		for (;; i++) {
-			update();
-			if (i % 200 == 0) {
-				tempCurrentValidationMae = mae(validationSet);
-
-				// Show the process
-				System.out.println("Round " + i);
-				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
-						+ rsme(validationSet));
-
-				if (tempCurrentValidationMae > tempLastValidationMae) {
-					break;
+		// Step 2. Train more.
+		if (paraValidation) {
+			//Terminate when the performance on the validation set gets worse.
+			for (;; i++) {
+				update();
+				if (i % 200 == 0) {
+						//Use validation set to terminate 
+					tempCurrentValidationMae = mae(validationSet);
+	
+					// Show the process
+					System.out.println("Round " + i);
+					System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
+					System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
+							+ rsme(validationSet));
+	
+					if (tempCurrentValidationMae > tempLastValidationMae) {
+						break;
+					} // Of if
+					tempLastValidationMae = tempCurrentValidationMae;
 				} // Of if
-				tempLastValidationMae = tempCurrentValidationMae;
-			} // Of if
-
-			// Decrease the learning rate. In this way we can set bigger
-			// learning rate at the beginning.
-			// if ((i + 1) % 10000 == 0) {
-			// alpha /= 2; Code not used now.
-			// System.out.println("-----alpha = " + alpha);
-			// } // Of if
-		} // Of for i
+			} // Of for i
+		}else {
+			double tempCurrentTrainingMae = 100;
+			double tempLastTrainingMae = 100;
+			//double tempDifference = 0;
+			//Terminate if converge 
+			for (;; i++) {
+				update();
+				if (i % 200 == 0) {
+					tempCurrentTrainingMae = mae(trainingSet);
+	
+					// Show the process
+					System.out.println("Round " + i);
+					System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
+	
+					//tempDifference = tempLastTrainingMae - tempCurrentTrainingMae;
+					//System.out.println("Difference = " + tempDifference);
+					if (tempLastTrainingMae - tempCurrentTrainingMae < 1e-4) {
+						break;
+					} // Of if
+					tempLastTrainingMae = tempCurrentTrainingMae;
+				} // Of if
+			} // Of for i
+		}//Of if paraValidation
+		
+		return i;
 	}// Of train
 
 	/**
