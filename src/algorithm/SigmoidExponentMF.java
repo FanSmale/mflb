@@ -14,6 +14,9 @@ public class SigmoidExponentMF extends SimpleMatrixFactorization {
 	 */
 	double constantC = 1.0;
 
+	/**
+	 * The constant for controlling the exponent.
+	 */
 	double lambda = 1.0;
 
 	/**
@@ -32,8 +35,9 @@ public class SigmoidExponentMF extends SimpleMatrixFactorization {
 	 *            The number of ratings.
 	 ************************ 
 	 */
-	public SigmoidExponentMF(Triple[][] paraTrainingSet, Triple[][] paraValidationSet, int paraNumUsers,
-			int paraNumItems, double paraRatingLowerBound, double paraRatingUpperBound) {
+	public SigmoidExponentMF(Triple[][] paraTrainingSet, Triple[][] paraValidationSet,
+			int paraNumUsers, int paraNumItems, double paraRatingLowerBound,
+			double paraRatingUpperBound) {
 		super(paraTrainingSet, paraValidationSet, paraNumUsers, paraNumItems, paraRatingLowerBound,
 				paraRatingUpperBound);
 	}// Of the constructor
@@ -46,9 +50,9 @@ public class SigmoidExponentMF extends SimpleMatrixFactorization {
 	public void update() {
 		// Step1: update subU
 		// double tempC = parameters.mxNormalization;
-		double tempQij; // The residual
-		double tempExp;
-		double tempCoefficent;
+		double tempQij = 0; // The residual
+		double tempExp = 0;
+		double tempCoefficent = 0;
 		boolean tempSign = true; // Positive
 		for (int i = 0; i < trainingSet.length; i++) {
 			for (int j = 0; j < trainingSet[i].length; j++) {
@@ -64,22 +68,30 @@ public class SigmoidExponentMF extends SimpleMatrixFactorization {
 					tempQij = -tempQij;
 				} // Of if
 
-				tempExp = Math.exp(-Math.pow(tempQij, lambda) / constantC);
+				if (lambda == 1.0) {
+					tempExp = Math.exp(-tempQij / constantC);
+					tempCoefficent = -8 * (1 - tempExp) * tempExp / constantC
+							/ Math.pow(1 + tempExp, 3);
+				} else {
+					tempExp = Math.exp(-Math.pow(tempQij, lambda) / constantC);
+					tempCoefficent = -8 * lambda * (1 - tempExp) * tempExp
+							* Math.pow(tempQij, lambda - 1) / constantC / Math.pow(1 + tempExp, 3);
+				} // Of if
 
-				tempCoefficent = -8 * lambda * (1 - tempExp) * tempExp * Math.pow(tempQij, lambda - 1) / constantC
-						/ Math.pow(1 + tempExp, 3);
 				if (!tempSign) {
 					tempCoefficent = -tempCoefficent;
 				} // Of if
 
 				// Update user subspace
 				for (int k = 0; k < rank; k++) {
-					userSubspace[tempUserId][k] -= alpha * (tempCoefficent * itemSubspace[tempItemId][k]);
+					userSubspace[tempUserId][k] -= alpha
+							* (tempCoefficent * itemSubspace[tempItemId][k]);
 				} // Of for k
 
 				// Update item subspace
 				for (int k = 0; k < rank; k++) {
-					itemSubspace[tempItemId][k] -= alpha * (tempCoefficent * userSubspace[tempUserId][k]);
+					itemSubspace[tempItemId][k] -= alpha
+							* (tempCoefficent * userSubspace[tempUserId][k]);
 				} // Of for k
 			} // Of for j
 		} // Of for i

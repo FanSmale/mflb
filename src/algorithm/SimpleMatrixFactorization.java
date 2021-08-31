@@ -88,8 +88,9 @@ public class SimpleMatrixFactorization {
 	 *            The number of ratings.
 	 ************************ 
 	 */
-	public SimpleMatrixFactorization(Triple[][] paraTrainingSet, Triple[][] paraValidationSet, int paraNumUsers,
-			int paraNumItems, double paraRatingLowerBound, double paraRatingUpperBound) {
+	public SimpleMatrixFactorization(Triple[][] paraTrainingSet, Triple[][] paraValidationSet,
+			int paraNumUsers, int paraNumItems, double paraRatingLowerBound,
+			double paraRatingUpperBound) {
 		trainingSet = paraTrainingSet;
 		validationSet = paraValidationSet;
 		numUsers = paraNumUsers;
@@ -176,20 +177,22 @@ public class SimpleMatrixFactorization {
 				// Show the process
 				System.out.println("Round " + i);
 				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = " + rsme(validationSet));
+				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
+						+ rsme(validationSet));
 			} // Of if
 		} // Of for i
 
 		// Step 2. Stop after converge.
 		for (;; i++) {
 			update();
-			if (i % 500 == 0) {
+			if (i % 200 == 0) {
 				tempCurrentValidationMae = mae(validationSet);
 
 				// Show the process
 				System.out.println("Round " + i);
 				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = " + rsme(validationSet));
+				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
+						+ rsme(validationSet));
 
 				if (tempCurrentValidationMae > tempLastValidationMae) {
 					break;
@@ -432,16 +435,20 @@ public class SimpleMatrixFactorization {
 
 	/**
 	 ************************ 
-	 * Get NDCG of the dataset.
+	 * Compute AUC of the dataset.
 	 * 
-	 * @param paraData
+	 * @param paraDataset
 	 *            The given dataset.
+	 * @param paraLikeThresholds
+	 *            A number of thresholds.
+	 * @return An array of AUC, one for each threshold.
 	 ************************ 
 	 */
-	public double auc(Triple[][] paraDataset, double paraLikeThreshold) {
-		System.out.println("Compute auc with like threshold " + paraLikeThreshold);
-		double tempLikeCount = 0;
-		double tempDislikeCount = 0;
+	public double[] auc(Triple[][] paraDataset, double[] paraLikeThresholds) {
+		int tempSize = paraLikeThresholds.length;
+
+		double[] tempLikeCounts = new double[tempSize];
+		double[] tempDislikeCounts = new double[tempSize];
 
 		// Step 1. Copy data to an array.
 		int tempLength = 0;
@@ -465,35 +472,37 @@ public class SimpleMatrixFactorization {
 		} // Of for i
 		int[] tempSortedIndices = mergeSortToIndices(tempPredictions);
 
-		boolean[] tempCorrectArray = new boolean[tempLength];
-		for (int i = 0; i < tempCorrectArray.length; i++) {
-			// System.out.println("Prediction = " +
-			// tempPredictions[tempSortedIndices[i]] + ", rating = "
-			// + tempDataArray[tempSortedIndices[i]].rating + ", threshold = " +
-			// paraLikeThreshold);
-			if (tempDataArray[tempSortedIndices[i]].rating > paraLikeThreshold - 0.001) {
-				tempCorrectArray[i] = true;
-				System.out.print("X ");
-				tempLikeCount++;
-			} else {
-				tempCorrectArray[i] = false;
-				System.out.print("O ");
-				tempDislikeCount++;
-			} // Of if
+		boolean[][] tempCorrectMatrix = new boolean[tempLength][tempSize];
+		for (int i = 0; i < tempLength; i++) {
+			for (int j = 0; j < tempSize; j++) {
+				if (tempDataArray[tempSortedIndices[i]].rating > paraLikeThresholds[j] - 0.001) {
+					tempCorrectMatrix[i][j] = true;
+					System.out.print("X ");
+					tempLikeCounts[j]++;
+				} else {
+					tempCorrectMatrix[i][j] = false;
+					System.out.print("O ");
+					tempDislikeCounts[j]++;
+				} // Of if
+			} // Of for j
 		} // Of for i
 
 		// Compute AUC value.
-		double tempWidth = tempDislikeCount;
-		double tempTotalArea = 0;
-		for (int i = 0; i < tempCorrectArray.length; i++) {
-			if (!tempCorrectArray[i]) {
-				tempWidth--;
-			} else {
-				tempTotalArea += tempWidth;
-			} // Of if
-		} // Of for i
+		double[] tempTotalAreaArray = new double[tempSize];
+		double[] resultAucArray = new double[tempSize];
+		for (int j = 0; j < tempSize; j++) {
+			double tempWidth = tempDislikeCounts[j];
+			for (int i = 0; i < tempLength; i++) {
+				if (tempCorrectMatrix[i][j]) {
+					tempTotalAreaArray[j] += tempWidth;
+				} else {
+					tempWidth--;
+				} // Of if
+			} // Of for i
+			resultAucArray[j] = tempTotalAreaArray[j] / tempLikeCounts[j] / tempDislikeCounts[j];
+		} // Of for j
 
-		return tempTotalArea / tempLikeCount / tempDislikeCount;
+		return resultAucArray;
 	}// Of auc
 
 	/**
@@ -547,17 +556,20 @@ public class SimpleMatrixFactorization {
 
 				if (tempSecondStart >= tempLength) {
 					for (int j = tempFirstIndex; j < tempLength; j++) {
-						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
+						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
+								% 2][j];
 						tempFirstIndex++;
 						tempCurrentIndex++;
 					} // Of for j
 					break;
 				} // Of if
 
-				while ((tempFirstIndex <= tempSecondStart - 1) && (tempSecondIndex <= tempSecondEnd)) {
+				while ((tempFirstIndex <= tempSecondStart - 1)
+						&& (tempSecondIndex <= tempSecondEnd)) {
 
-					if (paraArray[resultMatrix[tempIndex % 2][tempFirstIndex]] >= paraArray[resultMatrix[tempIndex
-							% 2][tempSecondIndex]]) {
+					if (paraArray[resultMatrix[tempIndex
+							% 2][tempFirstIndex]] >= paraArray[resultMatrix[tempIndex
+									% 2][tempSecondIndex]]) {
 						resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
 								% 2][tempFirstIndex];
 						tempFirstIndex++;
@@ -571,11 +583,13 @@ public class SimpleMatrixFactorization {
 
 				// Remaining part
 				for (int j = tempFirstIndex; j < tempSecondStart; j++) {
-					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
+					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
+							% 2][j];
 					tempCurrentIndex++;
 				} // Of for j
 				for (int j = tempSecondIndex; j <= tempSecondEnd; j++) {
-					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex % 2][j];
+					resultMatrix[(tempIndex + 1) % 2][tempCurrentIndex] = resultMatrix[tempIndex
+							% 2][j];
 					tempCurrentIndex++;
 				} // Of for j
 			} // Of for i
