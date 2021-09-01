@@ -7,7 +7,7 @@ import datamodel.Triple;
  * 
  * @author Fan Min minfanphd@163.com.
  */
-public class SigmoidMF extends SimpleMatrixFactorization {
+public class PQRegularSigmoidMF extends SimpleMatrixFactorization {
 
 	/**
 	 * The constant for controlling the shape.
@@ -30,7 +30,7 @@ public class SigmoidMF extends SimpleMatrixFactorization {
 	 *            The number of ratings.
 	 ************************ 
 	 */
-	public SigmoidMF(Triple[][] paraTrainingSet, Triple[][] paraValidationSet,
+	public PQRegularSigmoidMF(Triple[][] paraTrainingSet, Triple[][] paraValidationSet,
 			int paraNumUsers, int paraNumItems, double paraRatingLowerBound,
 			double paraRatingUpperBound) {
 		super(paraTrainingSet, paraValidationSet, paraNumUsers, paraNumItems, paraRatingLowerBound,
@@ -43,7 +43,6 @@ public class SigmoidMF extends SimpleMatrixFactorization {
 	 ************************ 
 	 */
 	public void update() {
-		//lambda = 0;
 		// Step1: update subU
 		double tempQij = 0; // The residual
 		double tempExp = 0;
@@ -61,16 +60,19 @@ public class SigmoidMF extends SimpleMatrixFactorization {
 				tempCoefficent = 8 * (1 - tempExp) * tempExp / constantC
 						/ Math.pow(1 + tempExp, 3);
 
+				double tempValue = 0;
 				// Update user subspace
 				for (int k = 0; k < rank; k++) {
-					userSubspace[tempUserId][k] += alpha
-							* tempCoefficent * itemSubspace[tempItemId][k];
+					tempValue = tempCoefficent * itemSubspace[tempItemId][k]
+							- lambda * userSubspace[tempUserId][k];
+					userSubspace[tempUserId][k] += alpha * tempValue;
 				} // Of for k
 
 				// Update item subspace
 				for (int k = 0; k < rank; k++) {
-					itemSubspace[tempItemId][k] += alpha
-							* tempCoefficent * userSubspace[tempUserId][k];
+					tempValue = tempCoefficent * userSubspace[tempUserId][k]
+							- lambda * itemSubspace[tempItemId][k];
+					itemSubspace[tempItemId][k] += alpha * tempValue;
 				} // Of for k
 			} // Of for j
 		} // Of for i
@@ -84,4 +86,4 @@ public class SigmoidMF extends SimpleMatrixFactorization {
 	public void setConstantC(double paraC) {
 		constantC = paraC;
 	}// Of setConstantC
-}// Of class SigmoidMF
+}// Of class PQRegularSigmoidMF

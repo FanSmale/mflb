@@ -179,15 +179,15 @@ public class SimpleMatrixFactorization {
 		int i = 0;
 		for (i = 0; i < paraMinimalRounds; i++) {
 			update();
-			if (i % 500 == 0) {
-				tempCurrentValidationMae = mae(validationSet);
+			//if (i % 500 == 0) {
+				//tempCurrentValidationMae = mae(validationSet);
 
 				// Show the process
-				System.out.println("Round " + i);
-				System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-				System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
-						+ rsme(validationSet));
-			} // Of if
+				//System.out.println("Round " + i);
+				//System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
+				//System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
+				//		+ rsme(validationSet));
+			//} // Of if
 		} // Of for i
 
 		// Step 2. Train more.
@@ -200,10 +200,10 @@ public class SimpleMatrixFactorization {
 					tempCurrentValidationMae = mae(validationSet);
 
 					// Show the process
-					System.out.println("Round " + i);
-					System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
-					System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
-							+ rsme(validationSet));
+					//System.out.println("Round " + i);
+					//System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
+					//System.out.println("Validation MAE = " + mae(validationSet) + ", RMSE = "
+					//		+ rsme(validationSet));
 
 					if (tempCurrentValidationMae > tempLastValidationMae) {
 						break;
@@ -222,8 +222,8 @@ public class SimpleMatrixFactorization {
 					tempCurrentTrainingMae = mae(trainingSet);
 
 					// Show the process
-					System.out.println("Round " + i);
-					System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
+					//System.out.println("Round " + i);
+					//System.out.println("Training MAE = " + mae() + ", RMSE = " + rsme());
 
 					// tempDifference = tempLastTrainingMae -
 					// tempCurrentTrainingMae;
@@ -553,6 +553,111 @@ public class SimpleMatrixFactorization {
 
 	/**
 	 ************************ 
+	 * Compute MAP of the dataset.
+	 * 
+	 * @param paraDataset
+	 *            The given dataset.
+	 * @param paraNumItems
+	 *            The total number of items.
+	 * @param paraLikeThresholds
+	 *            A number of thresholds.
+	 * @return MAP.
+	 ************************ 
+	 */
+	public double[] map(Triple[][] paraTrainingMatrix, Triple[][] paraValidationMatrix,
+			Triple[][] paraTestingMatrix, int paraNumItems, int paraK,
+			double[] paraLikeThresholds) {
+		int tempSize = paraLikeThresholds.length;
+		int tempNumUsers = paraTrainingMatrix.length;
+
+		double[] resultMapArray = new double[tempSize];
+		double tempMap = 0;
+		double[] tempPredictions = new double[paraNumItems];
+		double[] tempRatings = new double[paraNumItems];
+		boolean[] tempKnownArray = new boolean[paraNumItems];
+		for (int i = 0; i < tempNumUsers; i++) {
+			// System.out.println("User " + i);
+			// Step 1. Which ratings are known.
+			Arrays.fill(tempKnownArray, false);
+			for (int j = 0; j < paraTrainingMatrix[i].length; j++) {
+				tempKnownArray[paraTrainingMatrix[i][j].item] = true;
+			} // Of for i
+			for (int j = 0; j < paraValidationMatrix[i].length; j++) {
+				tempKnownArray[paraValidationMatrix[i][j].item] = true;
+			} // Of for i
+
+			// Step 2. Expand ratings of the current user.
+			Arrays.fill(tempRatings, -100);
+			for (int j = 0; j < paraTestingMatrix[i].length; j++) {
+				tempRatings[paraTestingMatrix[i][j].item] = paraTestingMatrix[i][j].rating;
+			} // Of for j
+
+			// Step 3. Predict the ratings of the current user.
+			for (int j = 0; j < paraNumItems; j++) {
+				tempPredictions[j] = predict(i, j);
+			} // Of for j
+
+			// Step 4. Sort the predictions.
+			int[] tempSortedIndices = mergeSortToIndices(tempPredictions);
+
+			// Step 4. Statistics on like counts.
+			int[] tempLikeCountArray = new int[tempSize];
+			for (int j = 0; j < tempSize; j++) {
+				int tempCounter = 0;
+				for (int k = 0;; k++) {
+					// Ignore known.
+
+					if (tempKnownArray[tempSortedIndices[k]]) {
+						continue;
+					} // Of if
+
+					if (tempRatings[tempSortedIndices[k]] > paraLikeThresholds[j] - 0.01) {
+						tempLikeCountArray[j]++;
+					} // Of if
+					tempCounter++;
+					if (tempCounter >= paraK) {
+						break;
+					} // Of if
+				} // Of for k
+			} // Of for j
+
+			// Step 5. Statistics for each threshold.
+			for (int j = 0; j < tempSize; j++) {
+				double tempCorrect = 0;
+				int tempCounter = 1;
+				tempMap = 0;
+
+				for (int k = 0;; k++) {
+					// Ignore known.
+					if (tempKnownArray[tempSortedIndices[k]]) {
+						continue;
+					} // Of if
+
+					// Missing values.
+					if (tempRatings[tempSortedIndices[k]] < -99.9) {
+						;
+					} else {
+						// Like this one.
+						if (tempRatings[tempSortedIndices[k]] > paraLikeThresholds[j] - 0.01) {
+							tempCorrect ++;
+							tempMap += tempCorrect / tempCounter;
+						} // Of if
+					} // Of if
+
+					tempCounter++;
+					if (tempCounter >= paraK) {
+						break;
+					} // Of if
+				} // Of for k
+				
+				resultMapArray[j] += tempMap / tempNumUsers;
+			} // Of for j
+		} // Of for i
+		return resultMapArray;
+	}// Of map
+
+	/**
+	 ************************ 
 	 * Compute NDCG of the dataset.
 	 * 
 	 * @param paraDataset
@@ -628,7 +733,6 @@ public class SimpleMatrixFactorization {
 				int tempRank = 0;
 
 				double tempIdcg = idcg(tempLikeCountArray[j]);
-				// System.out.println("tempIdcg = " + tempIdcg);
 
 				int tempCounter = 0;
 				for (int k = 0;; k++) {
@@ -659,13 +763,12 @@ public class SimpleMatrixFactorization {
 				} else {
 					tempNdcg = tempDcg / tempIdcg;
 				} // Of if
-					// System.out.println("tempNdcg = " + tempNdcg);
+				
 				resultNdcgArray[j] += tempNdcg / tempNumUsers;
 			} // Of for j
 		} // Of for i
 		return resultNdcgArray;
 	}// Of ndcg
-
 	/**
 	 ************************ 
 	 * Compute IDCG of the number.
