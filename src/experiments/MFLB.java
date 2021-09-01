@@ -550,7 +550,7 @@ public class MFLB {
 			// 100000, 1, 5, 1000, 2);
 			// lambdaAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 10);
-			schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 10);
+			schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 20);
 			//mapNdcgTest("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1,
 			// 5, 1000);
 		} catch (Exception e) {
