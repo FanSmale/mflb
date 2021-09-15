@@ -71,10 +71,10 @@ public class MFLB {
 			int paraMinimalRounds, int paraNumExperiments) throws Exception {
 		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems,
 				paraNumRatings);
-		int tempNumC = 2;
+		int tempNumC = 10;
 		double[] tempCValues = new double[tempNumC];
 		for (int i = 0; i < tempNumC; i++) {
-			tempCValues[i] = 0.8 + i * 0.2;
+			tempCValues[i] = 0.7 + i * 0.1;
 		} // Of for i
 
 		double[] tempOriginalLikeThresholds = { 3.0, 4.0, 5.0 };
@@ -332,8 +332,8 @@ public class MFLB {
 					tempValidation = true;
 					break;
 				case PQ_REGULAR_SIGMOID:
-					tempMF = new PQRegularSigmoidMF(tempTrainingMatrix, tempValidationMatrix, paraNumUsers,
-							paraNumItems, paraRatingLowerBound - tempMean,
+					tempMF = new PQRegularSigmoidMF(tempTrainingMatrix, tempValidationMatrix,
+							paraNumUsers, paraNumItems, paraRatingLowerBound - tempMean,
 							paraRatingUpperBound - tempMean);
 					tempValidation = true;
 					break;
@@ -353,7 +353,7 @@ public class MFLB {
 				tempTestMaeMatrix[i][j] = tempMF.mae(tempTestingMatrix);
 				tempTestRmseMatrix[i][j] = tempMF.rsme(tempTestingMatrix);
 				tempTestAucCubic[i][j] = tempMF.auc(tempTestingMatrix, tempLikeThresholds);
-				// Attention: K = 100 can be changed to other values. 
+				// Attention: K = 100 can be changed to other values.
 				tempTestMapCubic[i][j] = tempMF.map(tempTrainingMatrix, tempValidationMatrix,
 						tempTestingMatrix, paraNumItems, 100, tempLikeThresholds);
 				tempTestNdcgCubic[i][j] = tempMF.ndcg(tempTrainingMatrix, tempValidationMatrix,
@@ -507,8 +507,8 @@ public class MFLB {
 
 		RatingSystem tempRatingSystem = new RatingSystem(paraFilename, paraNumUsers, paraNumItems,
 				paraNumRatings);
-		
-		//Attention: to compute NDCG, use (0.5, 0.1). Otherwise use (0.8, 0.1).
+
+		// Attention: to compute NDCG, use (0.5, 0.1). Otherwise use (0.8, 0.1).
 		tempRatingSystem.splitTrainValidationTest(0.8, 0.1);
 		double tempMean = tempRatingSystem.getMeanRatingOfTrain();
 		Triple[][] tempTrainingMatrix = tempRatingSystem.getTrainingMatrix();
@@ -546,12 +546,15 @@ public class MFLB {
 	 */
 	public static void main(String args[]) {
 		try {
-			//constantCAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
+			// constantCAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 2);
+			constantCAdjusting("D:/data/amazonU1094I1673.txt", 1094, 1673,
+					34120, 1, 5, 1000, 2);
 			// lambdaAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 10);
-			schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 20);
-			//mapNdcgTest("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1,
+			// schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 20);
+			// mapNdcgTest("D:/data/movielens-943u1682m.txt", 943, 1682, 100000,
+			// 1,
 			// 5, 1000);
 		} catch (Exception e) {
 			e.printStackTrace();
