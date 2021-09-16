@@ -549,7 +549,7 @@ public class MFLB {
 			// constantCAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 2);
 			constantCAdjusting("D:/data/amazonU1094I1673.txt", 1094, 1673,
-					34120, 1, 5, 1000, 2);
+					34120, 1, 5, 1000, 10);
 			// lambdaAdjusting("D:/data/movielens-943u1682m.txt", 943, 1682,
 			// 100000, 1, 5, 1000, 10);
 			// schemeComparison("D:/data/movielens-943u1682m.txt", 943, 1682, 100000, 1, 5, 1000, 20);
